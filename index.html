@@ -1,1 +1,187 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKIRO CAFE | Raipur</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f7f0e5;color:#352116}
+header{background:#29180f;color:#f8ead5;text-align:center;padding:35px 15px}
+header h1{font-size:34px;letter-spacing:5px;margin:10px 0}
+header p{color:#dfc3a0}
+.tagline{font-style:italic}
+.container{max-width:700px;margin:auto;padding:16px}
+h2{border-bottom:2px solid #c7a47c;padding-bottom:8px}
+h3{margin-top:25px}
+.menu-item{background:#fffaf2;border-radius:12px;padding:14px;margin:10px 0;display:flex;align-items:center;gap:10px;box-shadow:0 2px 6px #0000000c}
+.emoji{font-size:30px}
+.info{flex:1}
+.price{color:#80502e;font-weight:bold;margin-top:6px}
+.qty{display:flex;align-items:center;gap:9px}
+.qty button{background:#432819;color:white;border:0;border-radius:6px;width:30px;height:30px;font-size:18px}
+.cart{background:#ead8c1;padding:16px;border-radius:12px;margin-top:20px}
+.primary{background:#432819;color:white;border:0;border-radius:9px;padding:14px;font-size:16px;width:100%;margin-top:12px}
+input,textarea{display:block;width:100%;padding:13px;margin:8px 0 16px;border:1px solid #c7a47c;border-radius:8px;background:#fffaf2;font-size:16px}
+label{font-weight:bold}
+.small{font-size:12px;color:#725c4b}
+#checkout,#confirmation{display:none}
+footer{background:#29180f;color:#f8ead5;text-align:center;padding:20px;margin-top:25px}
+</style>
+</head>
+<body>
+
+<header>
+<div style="font-size:36px">☕</div>
+<h1>OKIRO CAFE</h1>
+<p>Raipur, Chhattisgarh</p>
+<div class="tagline">Your cozy corner for coffee & good food.</div>
+</header>
+
+<main class="container" id="menuPage">
+<h2>Our Menu</h2>
+<p>Choose your favourites and add them to your cart.</p>
+
+<h3>☕ Coffee & Hot Drinks</h3>
+<div id="hot"></div>
+<h3>🥤 Cold Drinks</h3>
+<div id="cold"></div>
+<h3>🍔 Quick Bites</h3>
+<div id="bites"></div>
+<h3>🍝 Meals</h3>
+<div id="meals"></div>
+<h3>🍰 Desserts</h3>
+<div id="desserts"></div>
+
+<div class="cart">
+<h2>🛒 Your Cart</h2>
+<div id="cartItems">Your cart is empty.</div>
+<h3>Total: ₹<span id="total">0</span></h3>
+<button class="primary" onclick="checkout()">Continue to Order →</button>
+</div>
+<p class="small">Demo only. Prices are examples and must be confirmed by the cafe.</p>
+</main>
+
+<section class="container" id="checkout">
+<h2>Delivery Details</h2>
+<form id="orderForm">
+<label for="customer">Full Name *</label>
+<input id="customer" required placeholder="Your name">
+
+<label for="phone">Contact Number *</label>
+<input id="phone" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit number">
+
+<label for="address">Delivery Address *</label>
+<textarea id="address" required rows="3" placeholder="Your delivery address"></textarea>
+
+<button class="primary" type="submit">Preview Order</button>
+</form>
+<button class="primary" onclick="back()">← Back to Menu</button>
+</section>
+
+<section class="container" id="confirmation">
+<h2>Order Preview ☕</h2>
+<p id="thanks"></p>
+<div id="finalItems"></div>
+<h3>Total: ₹<span id="finalTotal">0</span></h3>
+<p class="small">This is a demo. No order has been sent to the cafe.</p>
+<button class="primary" onclick="back()">Back to Menu</button>
+</section>
+
+<footer>
+<strong>OKIRO CAFE</strong>
+<p>Raipur, Chhattisgarh</p>
+<small>Website concept demo</small>
+</footer>
+
+<script>
+const products=[
+["Espresso",100,"☕","hot"],
+["Cappuccino",150,"☕","hot"],
+["Cafe Latte",160,"🥛","hot"],
+["Hot Chocolate",170,"🍫","hot"],
+["Cold Coffee",180,"🧋","cold"],
+["Iced Latte",190,"🥤","cold"],
+["Lemon Iced Tea",120,"🍋","cold"],
+["Chocolate Shake",180,"🍫","cold"],
+["French Fries",130,"🍟","bites"],
+["Veg Burger",160,"🍔","bites"],
+["Grilled Sandwich",150,"🥪","bites"],
+["Garlic Bread",140,"🍞","bites"],
+["White Sauce Pasta",240,"🍝","meals"],
+["Red Sauce Pasta",230,"🍝","meals"],
+["Veg Pizza",280,"🍕","meals"],
+["Paneer Wrap",190,"🌯","meals"],
+["Chocolate Brownie",140,"🍫","desserts"],
+["Cheesecake",200,"🍰","desserts"],
+["Chocolate Muffin",100,"🧁","desserts"]
+];
+
+const qty=products.map(()=>0);
+const sections={hot:"hot",cold:"cold",bites:"bites",meals:"meals",desserts:"desserts"};
+
+products.forEach((p,i)=>{
+document.getElementById(sections[p[3]]).innerHTML+=`
+<div class="menu-item">
+<div class="emoji">${p[2]}</div>
+<div class="info"><strong>${p[0]}</strong>
+<div class="price">₹${p[1]}</div></div>
+<div class="qty">
+<button type="button" onclick="change(${i},-1)">−</button>
+<span id="q${i}">0</span>
+<button type="button" onclick="change(${i},1)">+</button>
+</div></div>`;
+});
+
+function change(i,n){
+qty[i]=Math.max(0,qty[i]+n);
+document.getElementById("q"+i).textContent=qty[i];
+update();
+}
+
+function update(){
+let total=0,html="";
+products.forEach((p,i)=>{
+if(qty[i]>0){
+let sum=p[1]*qty[i];
+total+=sum;
+html+=`<p>${p[0]} × ${qty[i]} — ₹${sum}</p>`;
+}
+});
+document.getElementById("cartItems").innerHTML=html||"Your cart is empty.";
+document.getElementById("total").textContent=total;
+}
+
+function checkout(){
+if(!qty.some(n=>n>0)){alert("Please add an item first!");return;}
+document.getElementById("menuPage").style.display="none";
+document.getElementById("checkout").style.display="block";
+window.scrollTo(0,0);
+}
+
+function back(){
+document.getElementById("menuPage").style.display="block";
+document.getElementById("checkout").style.display="none";
+document.getElementById("confirmation").style.display="none";
+window.scrollTo(0,0);
+}
+
+document.getElementById("orderForm").addEventListener("submit",function(e){
+e.preventDefault();
+let html="";
+products.forEach((p,i)=>{
+if(qty[i]>0)html+=`<p>${p[0]} × ${qty[i]} — ₹${p[1]*qty[i]}</p>`;
+});
+document.getElementById("thanks").textContent=
+"Thanks, "+document.getElementById("customer").value+"! Here is your demo order.";
+document.getElementById("finalItems").innerHTML=html;
+document.getElementById("finalTotal").textContent=document.getElementById("total").textContent;
+document.getElementById("checkout").style.display="none";
+document.getElementById("confirmation").style.display="block";
+window.scrollTo(0,0);
+});
+</script>
+</body>
+</html>
+
